@@ -1,0 +1,1 @@
+module.exports = require('./src/functions/sign-data/sign-data.js')

@@ -41,9 +41,9 @@ export const handler: Handler = async (event, context) => {
   }
 
   // @ts-ignore
-  const { state, requiredData, sessionToken } = JSON.parse(event.body);
-  if (!state || !requiredData || !sessionToken) {
-    return handleError("provide state, token and payload!");
+  const { state, link_with, sessionToken, provider, user_id, action } = JSON.parse(event.body);
+  if (!state || !sessionToken) {
+    return handleError("provide state, link_with and sessionToken!");
   }
 
   try {
@@ -53,12 +53,15 @@ export const handler: Handler = async (event, context) => {
 
     const token = await new SignJWT({
       state,
-      requiredData,
+      link_with,
+      provider,
+      user_id,
+      action,
     })
       .setSubject(payload.sub || "")
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setIssuedAt()
-      .setIssuer("https://auth0-progressive-profiling.netflify.app")
+      .setIssuer("https://cic-account-linking.netflify.app")
       .setExpirationTime("60s")
       .sign(Buffer.from(TOKEN_SIGNING || ""));
 
