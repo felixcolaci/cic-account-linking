@@ -103,6 +103,7 @@ export const CallbackePage = () => {
     });
   }, [auth0, localState, navigate, searchParams, setSearchParams, setUser]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const returnToAuth0 = () => {
     if (form) {
       setIsRedirecting(true);
