@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { LinkingRequest } from "../../misc/linking-request";
 import { Widget } from "./components/widget";
 import { useBrandingStore } from "../../misc/branding.store";
+import { getTheme } from "../../misc/theme";
+import { changeTheme } from "@nextui-org/react";
 
 export const StartPage = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +34,7 @@ export const StartPage = () => {
           );
           setConfig(res);
           setBrandingConfig(res.branding);
+          changeTheme(getTheme(res.branding));
         } else {
           navigate({
             pathname: "/error",

@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { useBrandingStore } from "./misc/branding.store";
 import { useEffect, useState } from "react";
+import { getTheme } from "./misc/theme";
 
 export const ThemedIndex = () => {
   const branding = useBrandingStore();
@@ -10,18 +11,7 @@ export const ThemedIndex = () => {
   const [theme, setTheme] = useState<any>();
 
   useEffect(() => {
-    const themeProps: any = {
-      type: "light",
-      theme: {
-        colors: {},
-      },
-    };
-    if (branding.primaryColor) {
-      themeProps.theme.colors.primary = branding.primaryColor;
-      themeProps.theme.colors.link = branding.primaryColor;
-    }
-
-    const newTheme = createTheme(themeProps);
+    const newTheme = getTheme(branding);
     setTheme(newTheme);
     changeTheme(newTheme);
     console.log(branding);
