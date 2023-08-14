@@ -123,11 +123,20 @@ export const Widget = (props: LinkingRequest) => {
       <Card.Body>
         <div style={{ textAlign: "center" }}>
           <p style={{ marginBottom: "1em", fontWeight: "bold" }}>Hey, {props.username || props.email}!</p>
-          <p>
-            {" "}
-            We have found other accounts with your email address {props.username ? <>({props.email})</> : ""}. Would you
-            like to link it?
-          </p>
+
+          {props.identities.length > 1 ? (
+            <p>
+              {" "}
+              We have found other accounts with your email address {props.username ? <>({props.email})</> : ""}. Would
+              you like to link one of them?
+            </p>
+          ) : (
+            <p>
+              {" "}
+              We have found another account with your email address {props.username ? <>({props.email})</> : ""}. Would
+              you like to link it?
+            </p>
+          )}
         </div>
         {props.identities.length > 1 ? (
           <IdentityList identities={props.identities} navigate={navigateToContinue}></IdentityList>
