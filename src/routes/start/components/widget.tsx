@@ -1,44 +1,37 @@
 import { TableBody, TableHeader } from "@react-stately/table";
 import { Identity, LinkingRequest } from "../../../misc/linking-request";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Table,
-  TableCell,
-  TableColumn,
-  TableRow,
-} from "@nextui-org/react";
+import { Button, Card, Table } from "@nextui-org/react";
 import { useNavigate } from "react-router";
+import { useBrandingStore } from "../../../misc/branding.store";
+import { buttonRadius } from "../../../misc/style-processor";
 
 const IdentityList = (props: { identities: Identity[]; navigate: (connection: string, provider: string) => void }) => {
   return (
     <>
       <h3 className="text-bold">Accounts found for linking</h3>
-      <Table hideHeader>
+      <Table
+        shadow={false}
+        css={{
+          paddingLeft: 0,
+        }}
+      >
         <TableHeader>
-          <TableColumn>Identity Provider</TableColumn>
-          <TableColumn>User ID</TableColumn>
-          <TableColumn>Action</TableColumn>
+          <Table.Column>Identity</Table.Column>
+          <Table.Column>User ID</Table.Column>
+          <Table.Column>Action</Table.Column>
         </TableHeader>
         <TableBody>
           {props.identities.map((identity) => {
             return (
-              <TableRow key={identity.user_id}>
-                <TableCell>{identity.provider}</TableCell>
-                <TableCell>{identity.user_id}</TableCell>
-                <TableCell>
-                  <Button
-                    color="primary"
-                    variant="solid"
-                    onClick={() => props.navigate(identity.connection, identity.provider)}
-                  >
+              <Table.Row key={identity.user_id}>
+                <Table.Cell>{identity.provider}</Table.Cell>
+                <Table.Cell>{identity.user_id}</Table.Cell>
+                <Table.Cell>
+                  <Button color="primary" onClick={() => props.navigate(identity.connection, identity.provider)}>
                     Link Account
                   </Button>
-                </TableCell>
-              </TableRow>
+                </Table.Cell>
+              </Table.Row>
             );
           })}
         </TableBody>
@@ -62,16 +55,21 @@ const OneIdentity = (props: { identity: Identity }) => {
       >
         Account found for linking
       </h3>
-      <Table hideHeader>
+      <Table
+        shadow={false}
+        css={{
+          paddingLeft: 0,
+        }}
+      >
         <TableHeader>
-          <TableColumn>Identity Provider</TableColumn>
-          <TableColumn>User ID</TableColumn>
+          <Table.Column>Identity</Table.Column>
+          <Table.Column>User ID</Table.Column>
         </TableHeader>
         <TableBody>
-          <TableRow key={props.identity.user_id}>
-            <TableCell>{props.identity.provider}</TableCell>
-            <TableCell>{props.identity.user_id}</TableCell>
-          </TableRow>
+          <Table.Row key={props.identity.user_id}>
+            <Table.Cell>{props.identity.provider}</Table.Cell>
+            <Table.Cell>{props.identity.user_id}</Table.Cell>
+          </Table.Row>
         </TableBody>
       </Table>
     </div>
@@ -80,6 +78,10 @@ const OneIdentity = (props: { identity: Identity }) => {
 
 export const Widget = (props: LinkingRequest) => {
   const navigate = useNavigate();
+
+  const branding = useBrandingStore();
+
+  const DEFAULT_TITLE = "Link your Accounts";
 
   const navigateToContinue = (connection: string, provider: string) => {
     navigate("/continue", {
@@ -102,32 +104,38 @@ export const Widget = (props: LinkingRequest) => {
 
   return (
     <Card
-      shadow="sm"
+      className="fullscreenOnMobile"
       style={{
         maxWidth: "500px",
         padding: "1em",
       }}
     >
-      <CardHeader
+      <Card.Header
         style={{
           display: "flex",
           justifyContent: "center",
+          flexDirection: "column",
         }}
       >
-        <h1 className="text-bold text-large">Link your Accounts</h1>
-      </CardHeader>
-      <CardBody>
-        <p>
-          Hey, {props.username || props.email}! We have found other accounts with your email address{" "}
-          {props.username ? <>({props.email})</> : ""}. Would you like to link it?
-        </p>
+        {branding.logoUrl ? <img alt="logo" src={branding.logoUrl} height="50px" /> : ""}
+        <h2>{branding.title ? branding.title : DEFAULT_TITLE}</h2>
+      </Card.Header>
+      <Card.Body>
+        <div style={{ textAlign: "center" }}>
+          <p style={{ marginBottom: "1em", fontWeight: "bold" }}>Hey, {props.username || props.email}!</p>
+          <p>
+            {" "}
+            We have found other accounts with your email address {props.username ? <>({props.email})</> : ""}. Would you
+            like to link it?
+          </p>
+        </div>
         {props.identities.length > 1 ? (
           <IdentityList identities={props.identities} navigate={navigateToContinue}></IdentityList>
         ) : (
           <OneIdentity identity={props.identities[0]}></OneIdentity>
         )}
-      </CardBody>
-      <CardFooter
+      </Card.Body>
+      <Card.Footer
         style={{
           display: "flex",
           flexDirection: "column",
@@ -139,7 +147,7 @@ export const Widget = (props: LinkingRequest) => {
           {props.identities.length === 1 ? (
             <Button
               color="primary"
-              variant="solid"
+              css={{ ...buttonRadius(branding) }}
               onClick={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
             >
               Link Account
@@ -148,11 +156,11 @@ export const Widget = (props: LinkingRequest) => {
             ""
           )}
 
-          <Button color="primary" variant="light" onClick={dismiss}>
+          <Button color="primary" light onClick={dismiss}>
             Dismiss
           </Button>
         </>
-      </CardFooter>
+      </Card.Footer>
     </Card>
   );
 };

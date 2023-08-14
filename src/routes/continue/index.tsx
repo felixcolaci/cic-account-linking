@@ -1,9 +1,9 @@
-import { Card, CardBody } from "@nextui-org/card";
+import { Card } from "@nextui-org/react";
 import { useLocation } from "react-router";
 
 import { Auth0Client } from "@auth0/auth0-spa-js";
 import { useEffect, useState } from "react";
-import { Spinner } from "@nextui-org/spinner";
+import { Loading } from "@nextui-org/react";
 
 interface LocalState {
   clientId: string;
@@ -55,15 +55,15 @@ export const ContinuePage = () => {
 
   return (
     <Card
-      shadow="sm"
+      className="fullscreenOnMobile"
       style={{
         maxWidth: "500px",
         padding: "1em",
       }}
     >
-      <CardBody>
-        <Spinner size="md"></Spinner>
-      </CardBody>
+      <Card.Body>
+        <Loading size="md"></Loading>
+      </Card.Body>
     </Card>
   );
 };

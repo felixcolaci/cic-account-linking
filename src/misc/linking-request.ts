@@ -1,3 +1,5 @@
+import { Branding } from "./branding.store";
+
 export interface LinkingRequest {
   iss: string;
   iat: number;
@@ -7,7 +9,7 @@ export interface LinkingRequest {
   email: string;
   username: string;
   identities: Identity[];
-  branding: Branding;
+  branding?: Branding;
   ui_client: Client;
 }
 
@@ -16,13 +18,6 @@ export interface Identity {
   provider: string;
   user_id: string;
   isSocial: boolean;
-}
-
-export interface Branding {
-  backgroundImage?: string;
-  primaryColor?: string;
-  backgroundColor?: string;
-  logoUrl?: string;
 }
 
 export interface Client {

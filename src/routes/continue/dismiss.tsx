@@ -1,8 +1,7 @@
-import { Card, CardBody, CardFooter } from "@nextui-org/card";
+import { Card, Loading } from "@nextui-org/react";
 import { useLocation, useNavigate } from "react-router";
 
 import { useEffect, useState } from "react";
-import { Spinner } from "@nextui-org/spinner";
 
 interface LocalState {
   clientId: string;
@@ -75,16 +74,16 @@ export const DismissPage = () => {
 
   return (
     <Card
-      shadow="sm"
+      className="fullscreenOnMobile"
       style={{
         maxWidth: "500px",
         padding: "1em",
       }}
     >
-      <CardBody>
-        <Spinner size="md"></Spinner>
-      </CardBody>
-      <CardFooter
+      <Card.Body>
+        <Loading size="md"></Loading>
+      </Card.Body>
+      <Card.Footer
         style={{
           display: "flex",
           flexDirection: "column",
@@ -113,7 +112,7 @@ export const DismissPage = () => {
             onChange={(e) => setSessionState(e.target.value)}
           ></input>
         </form>
-      </CardFooter>
+      </Card.Footer>
     </Card>
   );
 };

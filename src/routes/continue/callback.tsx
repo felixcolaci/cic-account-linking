@@ -1,11 +1,12 @@
-import { Button } from "@nextui-org/button";
-import { Card, CardBody, CardFooter } from "@nextui-org/card";
+import { Button, Loading } from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
 import { useLocation, useNavigate } from "react-router";
 
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useState } from "react";
-import { Spinner } from "@nextui-org/spinner";
 import { useSearchParams } from "react-router-dom";
+import { buttonRadius } from "../../misc/style-processor";
+import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
   clientId: string;
@@ -17,6 +18,7 @@ interface LocalState {
 }
 
 export const CallbackePage = () => {
+  const branding = useBrandingStore();
   const { state } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -107,8 +109,8 @@ export const CallbackePage = () => {
   const returnToAuth0 = () => {
     if (form) {
       setIsRedirecting(true);
-      console.log(form);
       form.submit();
+      branding.reset();
     }
   };
 
@@ -133,28 +135,28 @@ export const CallbackePage = () => {
     <>
       {isRedirecting ? (
         <Card
-          shadow="sm"
+          className="fullscreenOnMobile"
           style={{
             maxWidth: "500px",
             padding: "1em",
           }}
         >
-          <CardBody>
-            <Spinner size="md"></Spinner>
-          </CardBody>
+          <Card.Body>
+            <Loading size="md"></Loading>
+          </Card.Body>
         </Card>
       ) : (
         <Card
-          shadow="sm"
+          className="fullscreenOnMobile"
           style={{
             maxWidth: "500px",
             padding: "1em",
           }}
         >
-          <CardBody>
-            {user !== undefined ? <p>Successfully verified identity!</p> : <Spinner size="md"></Spinner>}
-          </CardBody>
-          <CardFooter
+          <Card.Body>
+            {user !== undefined ? <p>Successfully verified identity!</p> : <Loading size="md"></Loading>}
+          </Card.Body>
+          <Card.Footer
             style={{
               display: "flex",
               flexDirection: "column",
@@ -183,10 +185,10 @@ export const CallbackePage = () => {
                 onChange={(e) => setSessionState(e.target.value)}
               ></input>
             </form>
-            <Button type="button" color="primary" variant="solid" onClick={returnToAuth0}>
+            <Button css={{ ...buttonRadius(branding) }} type="button" color="primary" onClick={returnToAuth0}>
               Continue ({progress})
             </Button>
-          </CardFooter>
+          </Card.Footer>
         </Card>
       )}
     </>

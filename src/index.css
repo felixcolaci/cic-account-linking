@@ -19,3 +19,13 @@ code {
 }
 
 
+.fullscreenOnMobile {}
+
+@media screen and (max-width: 500px) {
+    .fullscreenOnMobile {
+        
+        height: 100vh !important;
+        border-radius: 0 !important;
+        
+    }
+}

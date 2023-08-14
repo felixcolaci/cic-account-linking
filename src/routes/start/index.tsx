@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LinkingRequest } from "../../misc/linking-request";
 import { Widget } from "./components/widget";
+import { useBrandingStore } from "../../misc/branding.store";
 
 export const StartPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [config, setConfig] = useState<LinkingRequest | undefined>(undefined);
+  const setBrandingConfig = useBrandingStore((state) => state.setConfig);
+  const resetBranding = useBrandingStore((state) => state.reset);
+
   useEffect(() => {
     fetch("https://cic-account-linking.netlify.app/.netlify/functions/verify-session", {
       method: "POST",
@@ -27,6 +31,7 @@ export const StartPage = () => {
             })
           );
           setConfig(res);
+          setBrandingConfig(res.branding);
         } else {
           navigate({
             pathname: "/error",
@@ -34,7 +39,7 @@ export const StartPage = () => {
           });
         }
       });
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, resetBranding, setBrandingConfig]);
 
   return <>{!config ? <h1>Loading</h1> : <Widget {...config}>Loaded</Widget>}</>;
 };
