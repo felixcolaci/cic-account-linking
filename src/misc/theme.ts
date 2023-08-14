@@ -11,6 +11,5 @@ export const getTheme = (branding: Branding) => {
     themeProps.theme.colors.primary = branding.primaryColor;
     themeProps.theme.colors.link = branding.primaryColor;
   }
-  console.log(themeProps);
   return createTheme(themeProps);
 };

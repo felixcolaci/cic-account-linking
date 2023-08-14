@@ -19,8 +19,6 @@ export const ThemedIndex = () => {
       const localBranding = JSON.parse(atob(query.get("branding") || "{}"));
       setTheme(getTheme(localBranding));
     }
-
-    console.log("root", branding);
   }, [branding]);
 
   return (
