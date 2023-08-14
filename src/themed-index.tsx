@@ -23,8 +23,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [branding]);
 
   return (
     <NextUIProvider theme={theme}>
