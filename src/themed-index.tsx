@@ -1,4 +1,4 @@
-import { NextUIProvider, createTheme } from "@nextui-org/react";
+import { NextUIProvider, changeTheme, createTheme } from "@nextui-org/react";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { useBrandingStore } from "./misc/branding.store";
@@ -23,6 +23,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
+    changeTheme(newTheme);
     console.log(branding);
   }, [branding]);
 
