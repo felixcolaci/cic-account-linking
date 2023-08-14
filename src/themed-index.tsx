@@ -1,4 +1,4 @@
-import { NextUIProvider, changeTheme } from "@nextui-org/react";
+import { NextUIProvider } from "@nextui-org/react";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { useBrandingStore } from "./misc/branding.store";
