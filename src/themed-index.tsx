@@ -10,6 +10,7 @@ export const ThemedIndex = () => {
 
   const [theme, setTheme] = useState<any>();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const themeProps: any = {
       type: "light",
@@ -24,7 +25,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
-  }, []);
+  });
 
   return (
     <NextUIProvider theme={theme}>
