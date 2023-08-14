@@ -16,7 +16,7 @@ export const ThemedIndex = () => {
 
     const query = new URLSearchParams(window.location.search);
     if (query.has("branding")) {
-      const localBranding = JSON.parse(Buffer.from(query.get("branding") || "{}", "base64url").toString("utf8"));
+      const localBranding = JSON.parse(atob(query.get("branding") || "{}"));
       setTheme(getTheme(localBranding));
     }
 
