@@ -23,6 +23,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
+    console.log(branding);
   }, [branding]);
 
   return (
