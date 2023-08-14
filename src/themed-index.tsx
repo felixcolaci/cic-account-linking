@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 export const ThemedIndex = () => {
   const branding = useBrandingStore();
-  console.log(branding);
 
   const [theme, setTheme] = useState<any>();
 
@@ -25,7 +24,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
-  });
+  }, []);
 
   return (
     <NextUIProvider theme={theme}>
