@@ -24,7 +24,7 @@ export const ThemedIndex = () => {
 
     const newTheme = createTheme(themeProps);
     setTheme(newTheme);
-  }, [branding.primaryColor]);
+  }, [branding]);
 
   return (
     <NextUIProvider theme={theme}>
