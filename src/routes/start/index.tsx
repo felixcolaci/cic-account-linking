@@ -34,6 +34,7 @@ export const StartPage = () => {
           );
           setConfig(res);
           setBrandingConfig(res.branding);
+          console.log("updated branding");
           changeTheme(getTheme(res.branding));
         } else {
           navigate({

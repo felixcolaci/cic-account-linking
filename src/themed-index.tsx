@@ -14,7 +14,7 @@ export const ThemedIndex = () => {
     const newTheme = getTheme(branding);
     setTheme(newTheme);
     changeTheme(newTheme);
-    console.log(branding);
+    console.log("root", branding);
   }, [branding]);
 
   return (
