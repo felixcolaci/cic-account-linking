@@ -127,14 +127,16 @@ export const Widget = (props: LinkingRequest) => {
           {props.identities.length > 1 ? (
             <p>
               {" "}
-              We have found other accounts with your email address {props.username ? <>({props.email})</> : ""}. Would
-              you like to link one of them?
+              It seems like you already have accounts with us using the same email address{" "}
+              {props.username ? <>({props.email})</> : ""}. Would you like to add your this new login to your existing
+              account?
             </p>
           ) : (
             <p>
               {" "}
-              We have found another account with your email address {props.username ? <>({props.email})</> : ""}. Would
-              you like to link it?
+              It seems like you already have an account with us using the same email address{" "}
+              {props.username ? <>({props.email})</> : ""}. Would you like to add your this new login to your existing
+              account?
             </p>
           )}
         </div>
@@ -159,14 +161,14 @@ export const Widget = (props: LinkingRequest) => {
               css={{ ...buttonRadius(branding) }}
               onClick={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
             >
-              Link Account
+              Update existing account
             </Button>
           ) : (
             ""
           )}
 
           <Button color="primary" light onClick={dismiss}>
-            Dismiss
+            Create seperate account
           </Button>
         </>
       </Card.Footer>
