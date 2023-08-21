@@ -1,11 +1,12 @@
 import { NextUIProvider } from "@nextui-org/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useSearchParams } from "react-router-dom";
 import App from "./App";
 import { useBrandingStore } from "./misc/branding.store";
 import { useEffect, useState } from "react";
 import { getTheme } from "./misc/theme";
 
 export const ThemedIndex = () => {
+  const [searchParams] = useSearchParams();
   const branding = useBrandingStore();
 
   const [theme, setTheme] = useState<any>();
@@ -13,15 +14,13 @@ export const ThemedIndex = () => {
   useEffect(() => {
     const newTheme = getTheme(branding);
     setTheme(newTheme);
-
-    const query = new URLSearchParams(window.location.search);
-    if (query.has("branding")) {
-      const localBranding = JSON.parse(atob(query.get("branding") || "{}"));
+    if (searchParams.has("branding")) {
+      const localBranding = JSON.parse(atob(searchParams.get("branding") || "{}"));
       branding.setConfig(localBranding);
       setTheme(getTheme(localBranding));
-      query.delete("branding");
+      searchParams.delete("branding");
     }
-  }, [branding]);
+  }, [branding, searchParams]);
 
   return (
     <NextUIProvider theme={theme}>
