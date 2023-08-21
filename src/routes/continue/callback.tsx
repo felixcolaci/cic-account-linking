@@ -1,11 +1,9 @@
-import { Button, Loading } from "@nextui-org/react";
+import { Loading } from "@nextui-org/react";
 import { Card } from "@nextui-org/react";
 import { useLocation, useNavigate } from "react-router";
 
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { buttonRadius, colors } from "../../misc/style-processor";
 import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
@@ -41,7 +39,6 @@ const getAuth0Client = () => {
 export const CallbackePage = () => {
   const branding = useBrandingStore();
   const { state } = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [localState, setLocalState] = useState<LocalState>();
@@ -50,7 +47,7 @@ export const CallbackePage = () => {
   const [form, setForm] = useState<HTMLFormElement | null>();
 
   // form inputs
-  const [action, setAction] = useState<string>();
+  const [formAction, setAction] = useState<string>();
   const [sessionState, setSessionState] = useState<string>();
   const [continueToken, setContinueToken] = useState<string>();
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -72,7 +69,7 @@ export const CallbackePage = () => {
           clientId: localState.clientId,
           domain: localState.domain,
           authorizationParams: {
-            redirect_uri: `${window.location.origin}/continue`,
+            redirect_uri: `${window.location.origin}/continue/callback`,
           },
           cacheLocation: "localstorage",
         })
@@ -85,6 +82,7 @@ export const CallbackePage = () => {
       if (!auth0) {
         try {
           setAuth0(getAuth0Client());
+          console.log(auth0);
         } catch (error) {
           console.log(error);
           navigate({
@@ -92,73 +90,62 @@ export const CallbackePage = () => {
             search: `?status=401&message=${error}`,
           });
         }
-      } else {
-        // catch callback
-        try {
-          await auth0.handleRedirectCallback();
-          const user = await auth0.getUser();
-          setUser(user);
-          searchParams.delete("code");
-          searchParams.delete("state");
-          setSearchParams(searchParams);
-          const token = await auth0.getTokenSilently();
-          const config = JSON.parse(localStorage.getItem("config") || "{}");
-          return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
-            method: "POST",
-            body: JSON.stringify({
-              link_with: token,
-              sessionToken: config.sessionToken,
-              state: config.state,
-              provider: localState?.provider,
-              action: localState?.action,
-              user_id: user?.sub,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-            .then((response) => response.json())
-            .then((response) => {
-              const config = JSON.parse(localStorage.getItem("config") || "{}");
-              setAction(`https://${config.ui_client.domain}/continue?state=${config.state}`);
-              setSessionState(config.state);
-              setContinueToken(response.token);
-            });
-        } catch (error) {
-          navigate({
-            pathname: "/error",
-            search: `?status=401&message=${error}`,
+      }
+      // catch callback
+      try {
+        await auth0?.handleRedirectCallback();
+        const user = await auth0?.getUser();
+        setUser(user);
+        //searchParams.delete("code");
+        //searchParams.delete("state");
+        //setSearchParams(searchParams);
+        const token = await auth0?.getTokenSilently();
+        const config = JSON.parse(localStorage.getItem("config") || "{}");
+        return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
+          method: "POST",
+          body: JSON.stringify({
+            link_with: token,
+            sessionToken: config.sessionToken,
+            state: config.state,
+            provider: localState?.provider,
+            action: localState?.action,
+            user_id: user?.sub,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((response) => {
+            const config = JSON.parse(localStorage.getItem("config") || "{}");
+            const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
+            console.log(newAction);
+            setAction(newAction);
+            setSessionState(config.state);
+            setContinueToken(response.token);
+            returnToAuth0();
           });
-        }
+      } catch (error) {
+        navigate({
+          pathname: "/error",
+          search: `?status=401&message=${error}`,
+        });
       }
     });
-  }, [auth0, localState, navigate, searchParams, setSearchParams, setUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const returnToAuth0 = () => {
     if (form) {
+      console.log(form);
       setIsRedirecting(true);
       form.submit();
       branding.reset();
+    } else {
+      console.log("form is undefined");
     }
   };
-
-  // progress
-  const [progress, setProgress] = useState(3);
-  useEffect(() => {
-    const calculate = (v: number): number => {
-      const value = v > 3 ? 0 : v + -1;
-      if (value === 0) {
-        returnToAuth0();
-      }
-      return value;
-    };
-    const interval = setInterval(() => {
-      setProgress((v) => calculate(v));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [returnToAuth0]);
 
   return (
     <>
@@ -196,7 +183,7 @@ export const CallbackePage = () => {
             <form
               method="post"
               id="returnToAuth0"
-              action={action}
+              action={formAction}
               ref={(ref) => {
                 setForm(ref);
               }}
@@ -214,14 +201,9 @@ export const CallbackePage = () => {
                 onChange={(e) => setSessionState(e.target.value)}
               ></input>
             </form>
-            <Button
-              css={{ ...buttonRadius(branding), ...colors(branding) }}
-              type="button"
-              color="primary"
-              onClick={returnToAuth0}
-            >
-              Continue ({progress})
-            </Button>
+            <p>{formAction}</p>
+            <p>{continueToken}</p>
+            <p>{state}</p>
           </Card.Footer>
         </Card>
       )}
