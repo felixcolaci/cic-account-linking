@@ -22,3 +22,31 @@ export const buttonRadius = (branding: Branding) => {
   }
   return styles;
 };
+
+export const colors = (branding: Branding) => {
+  const styles: React.CSSProperties = {};
+
+  if (branding.primaryColor) {
+    styles.backgroundColor = `${branding.primaryColor} !important`;
+  }
+
+  return styles;
+};
+export const colorsLight = (branding: Branding) => {
+  const styles: React.CSSProperties = {};
+
+  if (branding.primaryColor) {
+    styles.color = `${branding.primaryColor} !important`;
+  }
+
+  return styles;
+};
+export const colorsProgress = (branding: Branding) => {
+  const styles: React.CSSProperties = {};
+
+  if (branding.primaryColor) {
+    styles.borderColor = `${branding.primaryColor} !important`;
+  }
+
+  return styles;
+};

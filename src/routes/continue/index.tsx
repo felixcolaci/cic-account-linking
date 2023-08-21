@@ -4,6 +4,7 @@ import { useLocation } from "react-router";
 import { Auth0Client } from "@auth0/auth0-spa-js";
 import { useEffect, useState } from "react";
 import { Loading } from "@nextui-org/react";
+import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
   clientId: string;
@@ -17,7 +18,7 @@ export const ContinuePage = () => {
   const { state } = useLocation();
   const [localState, setLocalState] = useState<LocalState>();
   const [auth0, setAuth0] = useState<Auth0Client>();
-
+  const branding = useBrandingStore();
   useEffect(() => {
     if (state) {
       localStorage.setItem("state", JSON.stringify(state));
@@ -62,7 +63,7 @@ export const ContinuePage = () => {
       }}
     >
       <Card.Body>
-        <Loading size="md"></Loading>
+        <Loading css={{ "--nextui-colors-primary": branding.primaryColor }} size="md"></Loading>{" "}
       </Card.Body>
     </Card>
   );

@@ -3,7 +3,7 @@ import { Identity, LinkingRequest } from "../../../misc/linking-request";
 import { Button, Card, Table } from "@nextui-org/react";
 import { useNavigate } from "react-router";
 import { useBrandingStore } from "../../../misc/branding.store";
-import { buttonRadius } from "../../../misc/style-processor";
+import { buttonRadius, colors, colorsLight } from "../../../misc/style-processor";
 
 const IdentityList = (props: { identities: Identity[]; navigate: (connection: string, provider: string) => void }) => {
   return (
@@ -158,7 +158,7 @@ export const Widget = (props: LinkingRequest) => {
           {props.identities.length === 1 ? (
             <Button
               color="primary"
-              css={{ ...buttonRadius(branding) }}
+              css={{ ...buttonRadius(branding), ...colors(branding) }}
               onClick={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
             >
               Update existing account
@@ -167,7 +167,7 @@ export const Widget = (props: LinkingRequest) => {
             ""
           )}
 
-          <Button color="primary" light onClick={dismiss}>
+          <Button color="primary" light onClick={dismiss} css={{ ...colorsLight(branding) }}>
             Create seperate account
           </Button>
         </>

@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router";
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { buttonRadius } from "../../misc/style-processor";
+import { buttonRadius, colors } from "../../misc/style-processor";
 import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
@@ -185,7 +185,12 @@ export const CallbackePage = () => {
                 onChange={(e) => setSessionState(e.target.value)}
               ></input>
             </form>
-            <Button css={{ ...buttonRadius(branding) }} type="button" color="primary" onClick={returnToAuth0}>
+            <Button
+              css={{ ...buttonRadius(branding), ...colors(branding) }}
+              type="button"
+              color="primary"
+              onClick={returnToAuth0}
+            >
               Continue ({progress})
             </Button>
           </Card.Footer>
