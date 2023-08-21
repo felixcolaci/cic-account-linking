@@ -20,7 +20,7 @@ export const ThemedIndex = () => {
       setTheme(getTheme(localBranding));
       searchParams.delete("branding");
     }
-  }, [branding, searchParams]);
+  }, []);
 
   return (
     <NextUIProvider theme={theme}>
