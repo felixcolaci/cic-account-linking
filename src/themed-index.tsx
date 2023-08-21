@@ -20,6 +20,7 @@ export const ThemedIndex = () => {
       setTheme(getTheme(localBranding));
       searchParams.delete("branding");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
