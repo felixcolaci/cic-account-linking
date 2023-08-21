@@ -17,6 +17,27 @@ interface LocalState {
   action: "dismiss" | "link";
 }
 
+const getAuth0Client = () => {
+  const state = localStorage.getItem("state");
+  const config = localStorage.getItem("config");
+  if (state == null || config == null) {
+    throw new Error("config not present");
+  }
+  const localState = JSON.parse(state) as LocalState;
+  const localConfig = JSON.parse(config);
+  if (localState.domain !== localConfig.ui_client.domain) {
+    throw new Error("invalid config");
+  }
+  return new Auth0Client({
+    clientId: localState.clientId,
+    domain: localState.domain,
+    authorizationParams: {
+      redirect_uri: `${window.location.origin}/continue`,
+    },
+    cacheLocation: "localstorage",
+  });
+};
+
 export const CallbackePage = () => {
   const branding = useBrandingStore();
   const { state } = useLocation();
@@ -62,45 +83,53 @@ export const CallbackePage = () => {
   useEffect(() => {
     window.addEventListener("load", async () => {
       if (!auth0) {
-        console.log("no auth0 client available");
-        return;
-      }
-      // catch callback
-      try {
-        await auth0.handleRedirectCallback();
-        const user = await auth0.getUser();
-        setUser(user);
-        searchParams.delete("code");
-        searchParams.delete("state");
-        setSearchParams(searchParams);
-        const token = await auth0.getTokenSilently();
-        const config = JSON.parse(localStorage.getItem("config") || "{}");
-        return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
-          method: "POST",
-          body: JSON.stringify({
-            link_with: token,
-            sessionToken: config.sessionToken,
-            state: config.state,
-            provider: localState?.provider,
-            action: localState?.action,
-            user_id: user?.sub,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((response) => response.json())
-          .then((response) => {
-            const config = JSON.parse(localStorage.getItem("config") || "{}");
-            setAction(`https://${config.ui_client.domain}/continue?state=${config.state}`);
-            setSessionState(config.state);
-            setContinueToken(response.token);
+        try {
+          setAuth0(getAuth0Client());
+        } catch (error) {
+          console.log(error);
+          navigate({
+            pathname: "/error",
+            search: `?status=401&message=${error}`,
           });
-      } catch (error) {
-        navigate({
-          pathname: "/error",
-          search: `?status=401&message=${error}`,
-        });
+        }
+      } else {
+        // catch callback
+        try {
+          await auth0.handleRedirectCallback();
+          const user = await auth0.getUser();
+          setUser(user);
+          searchParams.delete("code");
+          searchParams.delete("state");
+          setSearchParams(searchParams);
+          const token = await auth0.getTokenSilently();
+          const config = JSON.parse(localStorage.getItem("config") || "{}");
+          return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
+            method: "POST",
+            body: JSON.stringify({
+              link_with: token,
+              sessionToken: config.sessionToken,
+              state: config.state,
+              provider: localState?.provider,
+              action: localState?.action,
+              user_id: user?.sub,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((response) => {
+              const config = JSON.parse(localStorage.getItem("config") || "{}");
+              setAction(`https://${config.ui_client.domain}/continue?state=${config.state}`);
+              setSessionState(config.state);
+              setContinueToken(response.token);
+            });
+        } catch (error) {
+          navigate({
+            pathname: "/error",
+            search: `?status=401&message=${error}`,
+          });
+        }
       }
     });
   }, [auth0, localState, navigate, searchParams, setSearchParams, setUser]);
