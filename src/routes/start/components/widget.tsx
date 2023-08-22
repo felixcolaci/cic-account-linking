@@ -27,7 +27,7 @@ const IdentityList = (props: { identities: Identity[]; navigate: (connection: st
                 <Table.Cell>{identity.provider}</Table.Cell>
                 <Table.Cell>{identity.user_id}</Table.Cell>
                 <Table.Cell>
-                  <Button color="primary" onClick={() => props.navigate(identity.connection, identity.provider)}>
+                  <Button color="primary" onPress={() => props.navigate(identity.connection, identity.provider)}>
                     Link Account
                   </Button>
                 </Table.Cell>
@@ -159,7 +159,7 @@ export const Widget = (props: LinkingRequest) => {
             <Button
               color="primary"
               css={{ ...buttonRadius(branding), ...colors(branding) }}
-              onClick={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
+              onPress={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
             >
               Update existing account
             </Button>
@@ -167,7 +167,7 @@ export const Widget = (props: LinkingRequest) => {
             ""
           )}
 
-          <Button color="primary" light onClick={dismiss} css={{ ...colorsLight(branding) }}>
+          <Button color="primary" light onPress={dismiss} css={{ ...colorsLight(branding) }}>
             Create seperate account
           </Button>
         </>

@@ -20,7 +20,7 @@ export const CallbackePage = () => {
   const branding = useBrandingStore();
   const { state } = useLocation();
   const navigate = useNavigate();
-  const submit = useSubmit();
+  
 
   const [localState, setLocalState] = useState<LocalState>();
   const [user, setUser] = useState<User>();
@@ -104,12 +104,27 @@ export const CallbackePage = () => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
 
-            const data = new FormData();
-            data.set("continueToken", response.token);
-            data.set("state", config.state);
-            console.log(data);
-            submit(data, { action: newAction });
-            branding.reset();
+            const data = new URLSearchParams();
+            data.append("continueToken", response.token);
+            data.append("state", config.state);
+
+            fetch(newAction, {
+              method: "post",
+              body: data.toString(),
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            })
+              .then((response) => {
+                const location = response.headers.get("location");
+                if (location) {
+                  window.location.href = location;
+                }
+              })
+              .finally(() => {
+                branding.reset();
+              });
+
             //returnToAuth0(newAction, response.token, config.state);
           });
       } catch (error) {
