@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router";
 
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useRef, useState } from "react";
-import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
   clientId: string;
@@ -22,14 +21,13 @@ interface SubmitParams {
 }
 
 const ContinueForm = (props: SubmitParams) => {
-  const branding = useBrandingStore();
   const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    if (formRef.current) {
-      branding.reset();
+    console.log(props);
+    if (formRef.current && props.action && props.continueToken && props.state) {
       formRef.current?.submit();
     }
-  }, [branding]);
+  }, [props]);
   return (
     <form method="post" id="returnToAuth0" action={props.action} ref={formRef}>
       <input type="hidden" name="continueToken" value={props.continueToken}></input>
@@ -42,7 +40,6 @@ export const CallbackePage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const [localState, setLocalState] = useState<LocalState>();
   const [user, setUser] = useState<User>();
   const [continueParams, setContinueParms] = useState<SubmitParams | undefined>();
 
@@ -74,7 +71,6 @@ export const CallbackePage = () => {
     if (state) {
       localStorage.setItem("state", JSON.stringify(state));
     }
-    setLocalState(JSON.parse(localStorage.getItem("state") || "{}"));
 
     const auth0 = getAuth0Client();
 
@@ -105,14 +101,15 @@ export const CallbackePage = () => {
         const token = await auth0.getTokenSilently();
         console.log(token);
         const config = JSON.parse(localStorage.getItem("config") || "{}");
+        const state = JSON.parse(localStorage.getItem("state") || "{}");
         return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
           method: "POST",
           body: JSON.stringify({
             link_with: token,
             sessionToken: config.sessionToken,
             state: config.state,
-            provider: localState?.provider,
-            action: localState?.action,
+            provider: state.provider,
+            action: state.action,
             user_id: user?.sub,
           }),
           headers: {

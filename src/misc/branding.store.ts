@@ -19,8 +19,9 @@ export type BrandingStore = Branding & {
 export const useBrandingStore = create<BrandingStore>()(
   persist(
     (set) => ({
-      setConfig: (branding: Branding) => set((state) => ({ ...state, ...branding })),
-      reset: () => set(() => ({})),
+      setConfig: (branding: Branding) =>
+        set((state) => ({ setConfig: state.setConfig, reset: state.reset, ...branding })),
+      reset: () => set((state) => ({ setConfig: state.setConfig, reset: state.reset })),
     }),
     { name: "branding-store" }
   )

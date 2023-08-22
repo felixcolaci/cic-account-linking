@@ -42,7 +42,8 @@ export const StartPage = () => {
           });
         }
       });
-  }, [searchParams, navigate, resetBranding, setBrandingConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <>{!config ? <h1>Loading</h1> : <Widget {...config}>Loaded</Widget>}</>;
 };
