@@ -35,7 +35,8 @@ export const CallbackePage = () => {
     if (formRef) {
       console.log(formRef);
       setIsRedirecting(true);
-      formRef.current!.dispatchEvent(new Event("submit"));
+      // formRef.current!.dispatchEvent(new Event("submit"))
+      formRef.current?.submit();
       branding.reset();
     } else {
       console.log("form is undefined");
@@ -117,7 +118,6 @@ export const CallbackePage = () => {
           .then((response) => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
-            console.log(newAction);
             setAction(newAction);
             setSessionState(config.state);
             setContinueToken(response.token);
@@ -180,9 +180,6 @@ export const CallbackePage = () => {
                 onChange={(e) => setSessionState(e.target.value)}
               ></input>
             </form>
-            <p>{formAction}</p>
-            <p>{continueToken}</p>
-            <p>{state}</p>
           </Card.Footer>
         </Card>
       )}
