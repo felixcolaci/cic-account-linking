@@ -1,5 +1,4 @@
 import { NextUIProvider } from "@nextui-org/react";
-import { BrowserRouter, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import { useBrandingStore } from "./misc/branding.store";
 import { useEffect, useState } from "react";
@@ -26,7 +25,7 @@ export const ThemedIndex = () => {
 
   return (
     <NextUIProvider theme={theme}>
-    <App />
+      <App />
     </NextUIProvider>
   );
 };

@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router";
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useRef, useState } from "react";
 import { useBrandingStore } from "../../misc/branding.store";
-import { useSubmit } from "react-router-dom";
 
 interface LocalState {
   clientId: string;
