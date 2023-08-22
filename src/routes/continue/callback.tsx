@@ -15,15 +15,36 @@ interface LocalState {
   action: "dismiss" | "link";
 }
 
-export const CallbackePage = () => {
+interface SubmitParams {
+  action: string;
+  state: string;
+  continueToken: string;
+}
+
+const ContinueForm = (props: SubmitParams) => {
   const branding = useBrandingStore();
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      branding.reset();
+      formRef.current?.submit();
+    }
+  }, [branding]);
+  return (
+    <form method="post" id="returnToAuth0" action={props.action} ref={formRef}>
+      <input type="hidden" name="continueToken" value={props.continueToken}></input>
+      <input type="hidden" name="state" value={props.state}></input>
+    </form>
+  );
+};
+
+export const CallbackePage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  
 
   const [localState, setLocalState] = useState<LocalState>();
   const [user, setUser] = useState<User>();
-  const formRef = useRef<HTMLFormElement>(null);
+  const [continueParams, setContinueParms] = useState<SubmitParams | undefined>();
 
   const [isRedirecting] = useState(false);
 
@@ -103,26 +124,11 @@ export const CallbackePage = () => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
 
-            const data = new URLSearchParams();
-            data.append("continueToken", response.token);
-            data.append("state", config.state);
-
-            fetch(newAction, {
-              method: "post",
-              body: data.toString(),
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-            })
-              .then((response) => {
-                const location = response.headers.get("location");
-                if (location) {
-                  window.location.href = location;
-                }
-              })
-              .finally(() => {
-                branding.reset();
-              });
+            setContinueParms({
+              action: newAction,
+              state: config.state,
+              continueToken: response.token,
+            });
 
             //returnToAuth0(newAction, response.token, config.state);
           });
@@ -168,13 +174,17 @@ export const CallbackePage = () => {
 
               gap: "1em",
             }}
-          >
-            <form method="post" id="returnToAuth0" ref={formRef}>
-              <input type="hidden" name="continueToken"></input>
-              <input type="hidden" name="state"></input>
-            </form>
-          </Card.Footer>
+          ></Card.Footer>
         </Card>
+      )}
+      {continueParams !== undefined ? (
+        <ContinueForm
+          action={continueParams.action}
+          state={continueParams.state}
+          continueToken={continueParams.continueToken}
+        />
+      ) : (
+        ""
       )}
     </>
   );
