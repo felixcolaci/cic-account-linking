@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router";
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
 import { useEffect, useRef, useState } from "react";
 import { useBrandingStore } from "../../misc/branding.store";
+import { useSubmit } from "react-router-dom";
 
 interface LocalState {
   clientId: string;
@@ -19,32 +20,13 @@ export const CallbackePage = () => {
   const branding = useBrandingStore();
   const { state } = useLocation();
   const navigate = useNavigate();
+  const submit = useSubmit();
 
   const [localState, setLocalState] = useState<LocalState>();
   const [user, setUser] = useState<User>();
   const formRef = useRef<HTMLFormElement>(null);
 
-  // form inputs
-  const [formAction] = useState<string>();
-  const [sessionState, setSessionState] = useState<string>();
-  const [continueToken, setContinueToken] = useState<string>();
-  const [isRedirecting, setIsRedirecting] = useState(false);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const returnToAuth0 = (action: string, continueToken: string, state: string) => {
-    if (formRef && formRef.current) {
-      setIsRedirecting(true);
-      // formRef.current!.dispatchEvent(new Event("submit"))
-      formRef.current.action = action;
-      formRef.current.setAttribute("state", state);
-      formRef.current.setAttribute("continueToken", continueToken);
-      console.log(formRef);
-      formRef.current.submit();
-      branding.reset();
-    } else {
-      console.log("form is undefined");
-    }
-  };
+  const [isRedirecting] = useState(false);
 
   const getAuth0Client = () => {
     const state = localStorage.getItem("state");
@@ -122,7 +104,13 @@ export const CallbackePage = () => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
 
-            returnToAuth0(newAction, response.token, config.state);
+            const data = new FormData();
+            data.set("continueToken", response.token);
+            data.set("state", config.state);
+            console.log(data);
+            submit(data, { action: newAction });
+            branding.reset();
+            //returnToAuth0(newAction, response.token, config.state);
           });
       } catch (error) {
         navigate({
@@ -167,19 +155,9 @@ export const CallbackePage = () => {
               gap: "1em",
             }}
           >
-            <form method="post" id="returnToAuth0" action={formAction} ref={formRef}>
-              <input
-                type="hidden"
-                name="continueToken"
-                value={continueToken}
-                onChange={(e) => setContinueToken(e.target.value)}
-              ></input>
-              <input
-                type="hidden"
-                name="state"
-                value={sessionState}
-                onChange={(e) => setSessionState(e.target.value)}
-              ></input>
+            <form method="post" id="returnToAuth0" ref={formRef}>
+              <input type="hidden" name="continueToken"></input>
+              <input type="hidden" name="state"></input>
             </form>
           </Card.Footer>
         </Card>
