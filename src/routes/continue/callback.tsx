@@ -3,7 +3,7 @@ import { Card } from "@nextui-org/react";
 import { useLocation, useNavigate } from "react-router";
 
 import { Auth0Client, User } from "@auth0/auth0-spa-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBrandingStore } from "../../misc/branding.store";
 
 interface LocalState {
@@ -15,36 +15,14 @@ interface LocalState {
   action: "dismiss" | "link";
 }
 
-const getAuth0Client = () => {
-  const state = localStorage.getItem("state");
-  const config = localStorage.getItem("config");
-  if (state == null || config == null) {
-    throw new Error("config not present");
-  }
-  const localState = JSON.parse(state) as LocalState;
-  const localConfig = JSON.parse(config);
-  if (localState.domain !== localConfig.ui_client.domain) {
-    throw new Error("invalid config");
-  }
-  return new Auth0Client({
-    clientId: localState.clientId,
-    domain: localState.domain,
-    authorizationParams: {
-      redirect_uri: `${window.location.origin}/continue`,
-    },
-    cacheLocation: "localstorage",
-  });
-};
-
 export const CallbackePage = () => {
   const branding = useBrandingStore();
   const { state } = useLocation();
   const navigate = useNavigate();
 
   const [localState, setLocalState] = useState<LocalState>();
-  const [auth0, setAuth0] = useState<Auth0Client>();
   const [user, setUser] = useState<User>();
-  const [form, setForm] = useState<HTMLFormElement | null>();
+  const formRef = useRef<HTMLFormElement>(null);
 
   // form inputs
   const [formAction, setAction] = useState<string>();
@@ -52,54 +30,74 @@ export const CallbackePage = () => {
   const [continueToken, setContinueToken] = useState<string>();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const returnToAuth0 = () => {
+    if (formRef) {
+      console.log(formRef);
+      setIsRedirecting(true);
+      formRef.current!.dispatchEvent(new Event("submit"));
+      branding.reset();
+    } else {
+      console.log("form is undefined");
+    }
+  };
+
+  const getAuth0Client = () => {
+    const state = localStorage.getItem("state");
+    const config = localStorage.getItem("config");
+    if (state == null || config == null) {
+      throw new Error("config not present");
+    }
+    const localState = JSON.parse(state) as LocalState;
+    const localConfig = JSON.parse(config);
+    if (localState.domain !== localConfig.ui_client.domain) {
+      throw new Error("invalid config");
+    }
+    const client = new Auth0Client({
+      clientId: localState.clientId,
+      domain: localState.domain,
+      authorizationParams: {
+        redirect_uri: `${window.location.origin}/continue`,
+      },
+      cacheLocation: "localstorage",
+    });
+    return client;
+  };
+
   useEffect(() => {
     if (state) {
       localStorage.setItem("state", JSON.stringify(state));
-      setLocalState(state);
-    } else {
-      const oldState = JSON.parse(localStorage.getItem("state") || "{}");
-      setLocalState(oldState);
     }
-  }, [setLocalState, state]);
+    setLocalState(JSON.parse(localStorage.getItem("state") || "{}"));
 
-  useEffect(() => {
-    if (localState) {
-      setAuth0(
-        new Auth0Client({
-          clientId: localState.clientId,
-          domain: localState.domain,
-          authorizationParams: {
-            redirect_uri: `${window.location.origin}/continue/callback`,
-          },
-          cacheLocation: "localstorage",
-        })
-      );
-    }
-  }, [localState]);
+    const auth0 = getAuth0Client();
 
-  useEffect(() => {
     window.addEventListener("load", async () => {
       if (!auth0) {
-        try {
-          setAuth0(getAuth0Client());
-          console.log(auth0);
-        } catch (error) {
-          console.log(error);
-          navigate({
-            pathname: "/error",
-            search: `?status=401&message=${error}`,
-          });
-        }
+        navigate({
+          pathname: "/error",
+          search: `?status=401&message=${"auth0 client was undefined"}`,
+        });
       }
       // catch callback
       try {
-        await auth0?.handleRedirectCallback();
+        try {
+          console.log("handling redirect");
+          await auth0.handleRedirectCallback();
+        } catch (error) {
+          console.log(error);
+          // throw new Error("error handling callback");
+        }
         const user = await auth0?.getUser();
         setUser(user);
+        if (!user) {
+          throw new Error("user could not be verified");
+        }
         //searchParams.delete("code");
         //searchParams.delete("state");
         //setSearchParams(searchParams);
-        const token = await auth0?.getTokenSilently();
+        const token = await auth0.getTokenSilently();
+        console.log(token);
         const config = JSON.parse(localStorage.getItem("config") || "{}");
         return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
           method: "POST",
@@ -133,19 +131,7 @@ export const CallbackePage = () => {
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const returnToAuth0 = () => {
-    if (form) {
-      console.log(form);
-      setIsRedirecting(true);
-      form.submit();
-      branding.reset();
-    } else {
-      console.log("form is undefined");
-    }
-  };
+  }, []);
 
   return (
     <>
@@ -180,14 +166,7 @@ export const CallbackePage = () => {
               gap: "1em",
             }}
           >
-            <form
-              method="post"
-              id="returnToAuth0"
-              action={formAction}
-              ref={(ref) => {
-                setForm(ref);
-              }}
-            >
+            <form method="post" id="returnToAuth0" action={formAction} ref={formRef}>
               <input
                 type="hidden"
                 name="continueToken"
