@@ -118,9 +118,13 @@ export const CallbackePage = () => {
           .then((response) => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
+
             setAction(newAction);
             setSessionState(config.state);
             setContinueToken(response.token);
+            console.log(formAction);
+            console.log(sessionState);
+            console.log(continueToken);
             returnToAuth0();
           });
       } catch (error) {
