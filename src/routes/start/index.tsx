@@ -11,7 +11,6 @@ export const StartPage = () => {
   const navigate = useNavigate();
   const [config, setConfig] = useState<LinkingRequest | undefined>(undefined);
   const setBrandingConfig = useBrandingStore((state) => state.setConfig);
-  const resetBranding = useBrandingStore((state) => state.reset);
 
   useEffect(() => {
     fetch("https://cic-account-linking.netlify.app/.netlify/functions/verify-session", {
