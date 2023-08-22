@@ -25,18 +25,21 @@ export const CallbackePage = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   // form inputs
-  const [formAction, setAction] = useState<string>();
+  const [formAction] = useState<string>();
   const [sessionState, setSessionState] = useState<string>();
   const [continueToken, setContinueToken] = useState<string>();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const returnToAuth0 = () => {
-    if (formRef) {
-      console.log(formRef);
+  const returnToAuth0 = (action: string, continueToken: string, state: string) => {
+    if (formRef && formRef.current) {
       setIsRedirecting(true);
       // formRef.current!.dispatchEvent(new Event("submit"))
-      formRef.current?.submit();
+      formRef.current.action = action;
+      formRef.current.setAttribute("state", state);
+      formRef.current.setAttribute("continueToken", continueToken);
+      console.log(formRef);
+      formRef.current.submit();
       branding.reset();
     } else {
       console.log("form is undefined");
@@ -119,13 +122,7 @@ export const CallbackePage = () => {
             const config = JSON.parse(localStorage.getItem("config") || "{}");
             const newAction = `https://${config.ui_client.domain}/continue?state=${config.state}`;
 
-            setAction(newAction);
-            setSessionState(config.state);
-            setContinueToken(response.token);
-            console.log(formAction);
-            console.log(sessionState);
-            console.log(continueToken);
-            returnToAuth0();
+            returnToAuth0(newAction, response.token, config.state);
           });
       } catch (error) {
         navigate({
