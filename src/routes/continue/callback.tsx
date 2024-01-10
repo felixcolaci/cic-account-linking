@@ -41,9 +41,14 @@ export const CallbackePage = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User>();
+  const [userToken, setUserToken] = useState("");
   const [continueParams, setContinueParms] = useState<SubmitParams | undefined>();
 
   const [isRedirecting] = useState(false);
+
+  if (state) {
+    localStorage.setItem("state", JSON.stringify(state));
+  }
 
   const getAuth0Client = () => {
     const state = localStorage.getItem("state");
@@ -68,44 +73,55 @@ export const CallbackePage = () => {
   };
 
   useEffect(() => {
-    if (state) {
-      localStorage.setItem("state", JSON.stringify(state));
-    }
 
-    const auth0 = getAuth0Client();
+    let getUser = async () => {
+      const auth0 = getAuth0Client();
 
-    window.addEventListener("load", async () => {
       if (!auth0) {
         navigate({
           pathname: "/error",
           search: `?status=401&message=${"auth0 client was undefined"}`,
         });
       }
-      // catch callback
+
       try {
-        try {
-          console.log("handling redirect");
-          await auth0.handleRedirectCallback();
-        } catch (error) {
-          console.log(error);
-          // throw new Error("error handling callback");
-        }
+        console.log("handling redirect");
+        await auth0.handleRedirectCallback();
         const user = await auth0?.getUser();
+        console.log(user);
         setUser(user);
+        const token = await auth0.getTokenSilently();
+        console.log(token);
+        setUserToken(token);
         if (!user) {
           throw new Error("user could not be verified");
         }
+      } catch (error) {
+        console.log(error);
+        // throw new Error("error handling callback");
+      }
+    }
+    
+    getUser();
+
+  }, []);
+
+  useEffect(() => {
+
+    let processAuth = async () => {
+      
+      // catch callback
+      try {
         //searchParams.delete("code");
         //searchParams.delete("state");
         //setSearchParams(searchParams);
-        const token = await auth0.getTokenSilently();
-        console.log(token);
+        
         const config = JSON.parse(localStorage.getItem("config") || "{}");
         const state = JSON.parse(localStorage.getItem("state") || "{}");
         return fetch("https://cic-account-linking.netlify.app/.netlify/functions/sign-data", {
           method: "POST",
           body: JSON.stringify({
-            link_with: token,
+            link_with: userToken,
             sessionToken: config.sessionToken,
             state: config.state,
             provider: state.provider,
@@ -135,9 +151,13 @@ export const CallbackePage = () => {
           search: `?status=401&message=${error}`,
         });
       }
-    });
+    };
+
+    if(user && userToken){
+      processAuth();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user, userToken]);
 
   return (
     <>
