@@ -1,11 +1,11 @@
 import { TableBody, TableHeader } from "@react-stately/table";
 import { Identity, LinkingRequest } from "../../../misc/linking-request";
-import { Button, Card, Table } from "@nextui-org/react";
+import { Badge, Button, Card, Table } from "@nextui-org/react";
 import { useNavigate } from "react-router";
 import { useBrandingStore } from "../../../misc/branding.store";
 import { buttonRadius, colors, colorsLight } from "../../../misc/style-processor";
 
-const IdentityList = (props: { identities: Identity[]; navigate: (connection: string, provider: string) => void }) => {
+const IdentityList = (props: { identities: Identity[]; navigate: (connection: string, provider: string, passkeys: boolean) => void }) => {
   return (
     <>
       <h3 className="text-bold">Accounts found for linking</h3>
@@ -24,10 +24,15 @@ const IdentityList = (props: { identities: Identity[]; navigate: (connection: st
           {props.identities.map((identity) => {
             return (
               <Table.Row key={identity.user_id}>
-                <Table.Cell>{identity.provider}</Table.Cell>
+                <Table.Cell>
+                  {identity.provider} {identity.uses_passkey ? <Badge>Passkey</Badge> : ""}
+                </Table.Cell>
                 <Table.Cell>{identity.user_id}</Table.Cell>
                 <Table.Cell>
-                  <Button color="primary" onPress={() => props.navigate(identity.connection, identity.provider)}>
+                  <Button
+                    color="primary"
+                    onPress={() => props.navigate(identity.connection, identity.provider, identity.uses_passkey)}
+                  >
                     Link Account
                   </Button>
                 </Table.Cell>
@@ -67,7 +72,9 @@ const OneIdentity = (props: { identity: Identity }) => {
         </TableHeader>
         <TableBody>
           <Table.Row key={props.identity.user_id}>
-            <Table.Cell>{props.identity.provider}</Table.Cell>
+            <Table.Cell>
+              {props.identity.provider} {props.identity.uses_passkey ? <Badge>Passkey</Badge> : ""}
+            </Table.Cell>
             <Table.Cell>{props.identity.user_id}</Table.Cell>
           </Table.Row>
         </TableBody>
@@ -83,11 +90,13 @@ export const Widget = (props: LinkingRequest) => {
 
   const DEFAULT_TITLE = "Link your Accounts";
 
-  const navigateToContinue = (connection: string, provider: string) => {
+  const navigateToContinue = (connection: string, provider: string, uses_passkey: boolean) => {
+    console.log(connection, provider, uses_passkey)
     navigate("/continue", {
       state: {
         action: "link",
         loginHint: props.email,
+        uses_passkey,
         connection,
         provider,
         ...props.ui_client,
@@ -159,7 +168,13 @@ export const Widget = (props: LinkingRequest) => {
             <Button
               color="primary"
               css={{ ...buttonRadius(branding), ...colors(branding) }}
-              onPress={() => navigateToContinue(props.identities[0].connection, props.identities[0].provider)}
+              onPress={() =>
+                navigateToContinue(
+                  props.identities[0].connection,
+                  props.identities[0].provider,
+                  props.identities[0].uses_passkey
+                )
+              }
             >
               Update existing account
             </Button>

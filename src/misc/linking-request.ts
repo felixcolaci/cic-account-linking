@@ -18,6 +18,7 @@ export interface Identity {
   provider: string;
   user_id: string;
   isSocial: boolean;
+  uses_passkey: boolean;
 }
 
 export interface Client {

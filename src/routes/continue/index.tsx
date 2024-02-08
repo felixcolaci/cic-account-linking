@@ -11,6 +11,7 @@ interface LocalState {
   domain: string;
   loginHint: string;
   connection: string;
+  uses_passkey: boolean;
   action: "dismiss" | "link";
 }
 
@@ -45,10 +46,11 @@ export const ContinuePage = () => {
   }, [localState]);
 
   useEffect(() => {
+    console.log(localState)
     auth0?.loginWithRedirect({
       authorizationParams: {
         connection: localState?.connection,
-        login_hint: localState?.loginHint,
+        login_hint: !localState?.uses_passkey &&  localState?.loginHint ? localState.loginHint : undefined,
         no_link: true,
       },
     });
